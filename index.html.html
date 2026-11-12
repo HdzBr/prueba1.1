@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html lang="es" class="dark scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KRYPTIC ARCHIVE // Estudio de Indumentaria & Archivo Editorial</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Syne (Display), Inter (Body), JetBrains Mono (Tech Specs) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Syne', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        void: '#09090B',      // Negro carbón profundo
+                        obsidian: '#121215',  // Superficie primaria
+                        graphite: '#1C1C21',  // Superficie elevada / bordes
+                        champagne: '#C6A87C', // Acento editorial sobrio (bronce/champán mate)
+                        slateMuted: '#9CA3AF',// Texto secundario
+                        platinum: '#E4E4E7'   // Texto principal alto contraste
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        @keyframes marquee {
+            0% { transform: translateX(0%); }
+            100% { transform: translateX(-50%); }
+        }
+        .animate-marquee {
+            display: flex;
+            width: max-content;
+            animation: marquee 34s linear infinite;
+        }
+        .animate-marquee:hover { animation-play-state: paused; }
+
+        .bg-noise {
+            background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 0);
+            background-size: 28px 28px;
+        }
+
+        /* Transición suave entre páginas internas */
+        .page-view {
+            animation: fadeInPage 0.35s ease-out;
+        }
+        @keyframes fadeInPage {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-void text-platinum font-sans antialiased selection:bg-champagne selection:text-void overflow-x-hidden flex flex-col min-h-screen">
+
+    <!-- =====================================================================
+         1. BARRA SUPERIOR EDITORIAL (SIN PRECIOS NI DESCUENTOS)
+    ====================================================================== -->
+    <div class="bg-obsidian border-b border-graphite text-slateMuted font-mono text-[11px] sm:text-xs py-2 px-4 relative z-40">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-1 text-center">
+            <span class="uppercase tracking-widest text-platinum">
+                ARCHIVO OFICIAL FW26 // EXHIBICIÓN DE PIEZAS Y PATRONAJE TÉCNICO
+            </span>
+            <div class="flex items-center gap-3 text-[11px]">
+                <button onclick="navigateTo('legal', 'licencias')" class="hover:text-champagne underline underline-offset-4 transition-colors">
+                    Créditos Visuales Verificados
+                </button>
+                <span class="text-zinc-700">|</span>
+                <button onclick="openAuditModal()" class="hover:text-champagne transition-colors flex items-center gap-1.5">
+                    <i class="fa-solid fa-shield-halved text-champagne"></i> Bitácora de Consentimiento
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================================
+         2. NAVBAR PRINCIPAL CON NAVEGACIÓN POR PÁGINAS INTERNAS (SPA)
+    ====================================================================== -->
+    <header class="sticky top-0 z-40 bg-void/90 backdrop-blur-xl border-b border-graphite">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            
+            <!-- Botón menú móvil -->
+            <button id="mobile-menu-btn" class="lg:hidden p-2.5 text-platinum hover:text-champagne rounded-xl bg-obsidian border border-graphite" aria-label="Abrir menú">
+                <i class="fa-solid fa-bars text-lg"></i>
+            </button>
+
+            <!-- Logo KRYPTIC ARCHIVE (SVG Original en paleta sobria) -->
+            <button onclick="navigateTo('inicio')" class="flex items-center gap-3.5 group text-left">
+                <div class="w-10 h-10 bg-obsidian border border-zinc-700 group-hover:border-champagne rounded-xl flex items-center justify-center transition-colors">
+                    <svg class="w-6 h-6 text-platinum group-hover:text-champagne transition-colors duration-300" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4 4H12V13L21 4H28L17 15.5L28 28H20.5L12 18.5V28H4V4Z" fill="currentColor"/>
+                        <rect x="23" y="13" width="5" height="5" fill="#C6A87C"/>
+                    </svg>
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-display font-extrabold text-xl tracking-tight leading-none text-white">KRYPTIC</span>
+                    <span class="font-mono text-[10px] tracking-[0.26em] text-slateMuted uppercase mt-1">ARCHIVE // STUDIO</span>
+                </div>
+            </button>
+
+            <!-- Navegación Desktop (Cada enlace abre su propia vista/página interna) -->
+            <nav class="hidden lg:flex items-center gap-6 font-mono text-xs uppercase tracking-widest text-slateMuted">
+                <button onclick="navigateTo('inicio')" data-nav="inicio" class="nav-link text-champagne py-2 transition-colors">Inicio</button>
+                <button onclick="navigateTo('coleccion')" data-nav="coleccion" class="nav-link hover:text-white py-2 transition-colors">Colección FW26</button>
+                <button onclick="navigateTo('temporada')" data-nav="temporada" class="nav-link hover:text-white py-2 transition-colors">Edición Temporada</button>
+                <button onclick="navigateTo('lookbook')" data-nav="lookbook" class="nav-link hover:text-white py-2 transition-colors">Lookbook</button>
+                <button onclick="navigateTo('trayectoria')" data-nav="trayectoria" class="nav-link hover:text-white py-2 transition-colors">Trayectoria</button>
+                <button onclick="navigateTo('comunidad')" data-nav="comunidad" class="nav-link hover:text-white py-2 transition-colors">Comunidad</button>
+                <button onclick="navigateTo('legal', 'privacidad')" data-nav="legal" class="nav-link hover:text-white py-2 transition-colors">Marco Legal</button>
+            </nav>
+
+            <!-- Acceso directo a Preferencias de Privacidad -->
+            <div class="flex items-center gap-2.5">
+                <button onclick="openCookieBanner()" class="px-3.5 py-2 rounded-xl bg-obsidian border border-graphite hover:border-champagne text-xs font-mono text-slateMuted hover:text-white transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-cookie-bite text-champagne"></i>
+                    <span class="hidden sm:inline">Privacidad & Cookies</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Menú desplegable Móvil -->
+        <div id="mobile-menu" class="hidden lg:hidden bg-obsidian border-b border-graphite px-6 py-5 space-y-3 font-mono text-xs uppercase">
+            <button onclick="navigateTo('inicio'); toggleMobileMenu()" class="block w-full text-left text-platinum hover:text-champagne py-1.5">01 // Inicio</button>
+            <button onclick="navigateTo('coleccion'); toggleMobileMenu()" class="block w-full text-left text-platinum hover:text-champagne py-1.5">02 // Colección FW26</button>
+            <button onclick="navigateTo('temporada'); toggleMobileMenu()" class="block w-full text-left text-platinum hover:text-champagne py-1.5">03 // Edición de Temporada</button>
+            <button onclick="navigateTo('lookbook'); toggleMobileMenu()" class="block w-full text-left text-platinum hover:text-champagne py-1.5">04 // Lookbook Editorial</button>
+            <button onclick="navigateTo('trayectoria'); toggleMobileMenu()" class="block w-full text-left text-platinum hover:text-champagne py-1.5">05 // Trayectoria de Marca</button>
+            <button onclick="navigateTo('comunidad'); toggleMobileMenu()" class="block w-full text-left text-platinum hover:text-champagne py-1.5">06 // Reseñas & Comunidad</button>
+            <button onclick="navigateTo('legal', 'terminos'); toggleMobileMenu()" class="block w-full text-left text-champagne py-1.5">07 // Documentación Legal</button>
+        </div>
+    </header>
+
+    <!-- =====================================================================
+         CONTENEDOR PRINCIPAL DE VISTAS / PÁGINAS INTERNAS
+    ====================================================================== -->
+    <main class="flex-1">
+
+        <!-- =================================================================
+             PÁGINA 1: INICIO (PORTADA EDITORIAL, CARRUSEL & RESUMEN)
+        ================================================================== -->
+        <div id="page-inicio" class="page-view">
+            <!-- Hero Banner & Carrusel Sobrio -->
+            <section class="relative overflow-hidden border-b border-graphite bg-noise">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
+                    <div class="relative rounded-3xl overflow-hidden border border-graphite bg-obsidian shadow-2xl">
+                        <div id="hero-slides" class="relative min-h-[520px] sm:min-h-[600px] flex items-center">
+                            
+                            <!-- SLIDE 1 -->
+                            <div class="hero-slide w-full h-full grid grid-cols-1 lg:grid-cols-12 items-center">
+                                <div class="lg:col-span-7 p-8 sm:p-12 lg:p-16 z-10 flex flex-col justify-center">
+                                    <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-void border border-graphite w-fit mb-6">
+                                        <span class="w-2 h-2 rounded-full bg-champagne"></span>
+                                        <span class="font-mono text-xs uppercase tracking-widest text-slateMuted">CÁPSULA 09 // ARQUITECTURA TEXTIL</span>
+                                    </div>
+                                    <h1 class="font-display font-extrabold text-4xl sm:text-6xl lg:text-7xl uppercase tracking-tight leading-[0.96] text-white mb-6">
+                                        FORJADOS EN <br>
+                                        <span class="text-champagne">EL CONCRETO</span>
+                                    </h1>
+                                    <p class="text-slateMuted text-base sm:text-lg max-w-xl mb-8 leading-relaxed">
+                                        Siluetas estructurales de alto gramaje (520 GSM), membranas técnicas hidrofóbicas y sastrería urbana contemporánea diseñada en ediciones limitadas.
+                                    </p>
+                                    <div class="flex flex-wrap items-center gap-4">
+                                        <button onclick="navigateTo('coleccion')" class="px-7 py-4 rounded-xl bg-platinum hover:bg-champagne text-void font-mono font-semibold text-xs uppercase tracking-wider transition-all">
+                                            Explorar Colección FW26 <i class="fa-solid fa-arrow-right ml-2"></i>
+                                        </button>
+                                        <button onclick="navigateTo('temporada')" class="px-7 py-4 rounded-xl bg-void hover:bg-graphite border border-zinc-700 text-platinum font-mono font-medium text-xs uppercase tracking-wider transition-all">
+                                            Ver Selección de Temporada
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="lg:col-span-5 relative h-80 sm:h-96 lg:h-[600px] w-full overflow-hidden">
+                                    <img src="https://images.unsplash.com/photo-1523398002811-999ca8dec234?auto=format&fit=crop&w=1000&q=80" 
+                                         onerror="this.src='https://placehold.co/800x900/121215/C6A87C?text=KRYPTIC+ARCHIVE+09'"
+                                         alt="Prenda superior oscura de corte arquitectónico KRYPTIC" 
+                                         class="w-full h-full object-cover object-center filter contrast-115 brightness-90">
+                                    <div class="absolute inset-0 bg-gradient-to-t lg:bg-gradient-to-r from-obsidian via-obsidian/45 to-transparent"></div>
+                                    <div class="absolute bottom-6 right-6 bg-void/90 backdrop-blur-md border border-graphite p-4 rounded-2xl font-mono text-xs">
+                                        <p class="text-champagne font-semibold">FICHA // KRP-HD-09</p>
+                                        <p class="text-platinum">100% Algodón French Terry 520 GSM</p>
+                                        <p class="text-slateMuted mt-1">ARCHIVO NUMERADO // SERIE LIMITADA</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- SLIDE 2 -->
+                            <div class="hero-slide hidden w-full h-full grid-cols-1 lg:grid-cols-12 items-center">
+                                <div class="lg:col-span-7 p-8 sm:p-12 lg:p-16 z-10 flex flex-col justify-center">
+                                    <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-void border border-graphite w-fit mb-6">
+                                        <span class="w-2 h-2 rounded-full bg-champagne"></span>
+                                        <span class="font-mono text-xs uppercase tracking-widest text-champagne">SELECCIÓN DE TEMPORADA // INVIERNO</span>
+                                    </div>
+                                    <h2 class="font-display font-extrabold text-4xl sm:text-6xl lg:text-7xl uppercase tracking-tight leading-[0.96] text-white mb-6">
+                                        OUTERWEAR <br>
+                                        <span class="text-zinc-400">TÉCNICO</span> 2026
+                                    </h2>
+                                    <p class="text-slateMuted text-base sm:text-lg max-w-xl mb-8 leading-relaxed">
+                                        Chaquetas modulares de tres capas, costuras termoselladas y cierres magnéticos de grado industrial. Descubre las piezas curadas para esta estación.
+                                    </p>
+                                    <div class="flex flex-wrap items-center gap-4">
+                                        <button onclick="navigateTo('temporada')" class="px-7 py-4 rounded-xl bg-champagne hover:bg-amber-200 text-void font-mono font-semibold text-xs uppercase tracking-wider transition-all">
+                                            Ir a Edición de Temporada <i class="fa-solid fa-arrow-right ml-2"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="lg:col-span-5 relative h-80 sm:h-96 lg:h-[600px] w-full overflow-hidden">
+                                    <img src="https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?auto=format&fit=crop&w=1000&q=80" 
+                                         onerror="this.src='https://placehold.co/800x900/121215/E4E4E7?text=OUTERWEAR+TECNICO'"
+                                         alt="Chaqueta técnica oscura KRYPTIC" 
+                                         class="w-full h-full object-cover object-center filter contrast-115 brightness-90">
+                                    <div class="absolute inset-0 bg-gradient-to-t lg:bg-gradient-to-r from-obsidian via-obsidian/45 to-transparent"></div>
+                                </div>
+                            </div>
+
+                            <!-- SLIDE 3 -->
+                            <div class="hero-slide hidden w-full h-full grid-cols-1 lg:grid-cols-12 items-center">
+                                <div class="lg:col-span-7 p-8 sm:p-12 lg:p-16 z-10 flex flex-col justify-center">
+                                    <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-void border border-graphite w-fit mb-6">
+                                        <span class="font-mono text-xs uppercase tracking-widest text-champagne">10 AÑOS DE DISEÑO INDEPENDIENTE</span>
+                                    </div>
+                                    <h2 class="font-display font-extrabold text-4xl sm:text-6xl lg:text-7xl uppercase tracking-tight leading-[0.96] text-white mb-6">
+                                        DE TALLER <br>
+                                        <span class="text-champagne">ARTESANAL</span> A ESTUDIO
+                                    </h2>
+                                    <p class="text-slateMuted text-base sm:text-lg max-w-xl mb-8 leading-relaxed">
+                                        Conoce la evolución de KRYPTIC ARCHIVE desde nuestro primer laboratorio de patronaje en 2016 hasta nuestras exhibiciones internacionales actuales.
+                                    </p>
+                                    <div class="flex flex-wrap items-center gap-4">
+                                        <button onclick="navigateTo('trayectoria')" class="px-7 py-4 rounded-xl bg-platinum hover:bg-champagne text-void font-mono font-semibold text-xs uppercase tracking-wider transition-all">
+                                            Conocer Trayectoria <i class="fa-solid fa-book-open ml-2"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="lg:col-span-5 relative h-80 sm:h-96 lg:h-[600px] w-full overflow-hidden">
+                                    <img src="https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=1000&q=80" 
+                                         onerror="this.src='https://placehold.co/800x900/121215/C6A87C?text=TRAYECTORIA+KRYPTIC'"
+                                         alt="Estudio de diseño monocromático" 
+                                         class="w-full h-full object-cover object-center filter grayscale contrast-120">
+                                    <div class="absolute inset-0 bg-gradient-to-t lg:bg-gradient-to-r from-obsidian via-obsidian/45 to-transparent"></div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Controles del Carrusel Hero -->
+                        <div class="absolute bottom-6 left-8 sm:left-12 z-20 flex items-center gap-3">
+                            <button onclick="prevHeroSlide()" class="w-11 h-11 rounded-xl bg-void/90 hover:bg-champagne hover:text-void border border-graphite flex items-center justify-center transition-colors" aria-label="Diapositiva anterior">
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </button>
+                            <button onclick="nextHeroSlide()" class="w-11 h-11 rounded-xl bg-void/90 hover:bg-champagne hover:text-void border border-graphite flex items-center justify-center transition-colors" aria-label="Siguiente diapositiva">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </button>
+                            <div class="flex gap-2 ml-3">
+                                <span class="hero-dot w-8 h-1.5 rounded-full bg-champagne transition-all cursor-pointer" onclick="goToHeroSlide(0)"></span>
+                                <span class="hero-dot w-3 h-1.5 rounded-full bg-zinc-700 transition-all cursor-pointer" onclick="goToHeroSlide(1)"></span>
+                                <span class="hero-dot w-3 h-1.5 rounded-full bg-zinc-700 transition-all cursor-pointer" onclick="goToHeroSlide(2)"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cinta Marquee Sobria -->
+                <div class="bg-obsidian border-t border-graphite py-3.5 overflow-hidden">
+                    <div class="animate-marquee font-mono text-xs uppercase tracking-widest text-slateMuted flex items-center gap-8">
+                        <span>PATRONAJE ARQUITECTÓNICO PROPIO</span>
+                        <span class="text-champagne">//</span>
+                        <span>ALGODÓN ORGÁNICO DE ALTO GRAMAJE 520 GSM</span>
+                        <span class="text-champagne">//</span>
+                        <span>PRODUCCIÓN NUMERADA DE ARCHIVO</span>
+                        <span class="text-champagne">//</span>
+                        <span>ESTÉTICA MONOCROMÁTICA CONTEMPORÁNEA</span>
+                        <span class="text-champagne">//</span>
+                        <span>PATRONAJE ARQUITECTÓNICO PROPIO</span>
+                        <span class="text-champagne">//</span>
+                        <span>ALGODÓN ORGÁNICO DE ALTO GRAMAJE 520 GSM</span>
+                        <span class="text-champagne">//</span>
+                        <span>PRODUCCIÓN NUMERADA DE ARCHIVO</span>
+                        <span class="text-champagne">//</span>
+                        <span>ESTÉTICA MONOCROMÁTICA CONTEMPORÁNEA</span>
+                        <span class="text-champagne">//</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Vista previa de secciones con enlaces directos a sus páginas internas -->
+            <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+                <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
+                    <div>
+                        <span class="font-mono text-xs text-champagne uppercase tracking-widest">// ÍNDICE DE ARCHIVO</span>
+                        <h2 class="font-display font-extrabold text-3xl sm:text-4xl uppercase tracking-tight text-white mt-1">
+                            EXPLORA LAS SECCIONES DEL ESTUDIO
+                        </h2>
+                    </div>
+                    <button onclick="navigateTo('coleccion')" class="font-mono text-xs text-champagne hover:underline uppercase tracking-wider">
+                        Ver Catálogo Completo <i class="fa-solid fa-arrow-right ml-1"></i>
+                    </button>
+                </div>
+
+                <!-- Carrusel Horizontal Destacado (Sin precios, solo imagen, nombre y descripción) -->
+                <div id="home-featured-carousel" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Tarjeta generada vía JS para consistencia -->
+                </div>
+
+                <!-- Accesos rápidos a páginas internas -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
+                    <div onclick="navigateTo('temporada')" class="cursor-pointer group relative rounded-3xl overflow-hidden border border-graphite hover:border-champagne/60 bg-obsidian p-8 transition-all">
+                        <span class="font-mono text-xs text-champagne uppercase tracking-widest">01 // CURADURÍA ESTACIONAL</span>
+                        <h3 class="font-display font-bold text-2xl text-white uppercase mt-2 mb-3 group-hover:text-champagne transition-colors">
+                            Edición de Temporada FW26
+                        </h3>
+                        <p class="text-sm text-slateMuted mb-5 leading-relaxed">
+                            Conjuntos coordinados y prendas exteriores diseñadas para condiciones climáticas adversas con acabados repelentes al agua.
+                        </p>
+                        <span class="font-mono text-xs text-platinum uppercase tracking-wider inline-flex items-center gap-2">
+                            Abrir página de temporada <i class="fa-solid fa-arrow-right text-champagne"></i>
+                        </span>
+                    </div>
+
+                    <div onclick="navigateTo('trayectoria')" class="cursor-pointer group relative rounded-3xl overflow-hidden border border-graphite hover:border-champagne/60 bg-obsidian p-8 transition-all">
+                        <span class="font-mono text-xs text-champagne uppercase tracking-widest">02 // HISTORIA & MANIFIESTO</span>
+                        <h3 class="font-display font-bold text-2xl text-white uppercase mt-2 mb-3 group-hover:text-champagne transition-colors">
+                            Trayectoria 2016 — 2026
+                        </h3>
+                        <p class="text-sm text-slateMuted mb-5 leading-relaxed">
+                            Conoce los hitos técnicos, la investigación textil y la evolución independiente de KRYPTIC ARCHIVE a lo largo de una década.
+                        </p>
+                        <span class="font-mono text-xs text-platinum uppercase tracking-wider inline-flex items-center gap-2">
+                            Leer historia completa <i class="fa-solid fa-arrow-right text-champagne"></i>
+                        </span>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- =================================================================
+             PÁGINA 2: COLECCIÓN FW26 (CATÁLOGO COMPLETO SIN PRECIOS)
+        ================================================================== -->
+        <div id="page-coleccion" class="page-view hidden">
+            <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+                <!-- Breadcrumb -->
+                <div class="font-mono text-xs text-slateMuted mb-6 flex items-center gap-2">
+                    <button onclick="navigateTo('inicio')" class="hover:text-champagne">INICIO</button>
+                    <span>/</span>
+                    <span class="text-platinum">COLECCIÓN FW26</span>
+                </div>
+
+                <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6 pb-8 border-b border-graphite">
+                    <div>
+                        <span class="font-mono text-xs text-champagne uppercase tracking-widest">// CATÁLOGO TÉCNICO DE ARCHIVO</span>
+                        <h1 class="font-display font-extrabold text-3xl sm:text-5xl uppercase tracking-tight text-white mt-1">
+                            COLECCIÓN FW26
+                        </h1>
+                        <p class="text-sm text-slateMuted mt-2 max-w-2xl">
+                            Archivo visual de prendas confeccionadas en serie limitada. Selecciona cualquier pieza para consultar su ficha de materiales, patronaje y cuidados.
+                        </p>
+                    </div>
+
+                    <!-- Filtros por categoría -->
+                    <div class="flex flex-wrap bg-obsidian p-1.5 rounded-xl border border-graphite font-mono text-xs gap-1">
+                        <button onclick="filterCollection('all', this)" class="col-filter-btn px-4 py-2 rounded-lg bg-champagne text-void font-semibold transition-all">TODAS</button>
+                        <button onclick="filterCollection('hoodies', this)" class="col-filter-btn px-4 py-2 rounded-lg text-slateMuted hover:text-white transition-all">HOODIES</button>
+                        <button onclick="filterCollection('cargos', this)" class="col-filter-btn px-4 py-2 rounded-lg text-slateMuted hover:text-white transition-all">PANTALONES</button>
+                        <button onclick="filterCollection('outerwear', this)" class="col-filter-btn px-4 py-2 rounded-lg text-slateMuted hover:text-white transition-all">CHAQUETAS</button>
+                    </div>
+                </div>
+
+                <!-- Grid de Prendas (Solo Imagen, Título y Descripción) -->
+                <div id="collection-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Renderizado dinámico desde el catálogo -->
+                </div>
+            </section>
+        </div>
+
+        <!-- =================================================================
+             PÁGINA 3: DETALLE INDIVIDUAL DE PRENDA (VISTA DEDICADA POR ITEM)
+        ================================================================== -->
+        <div id="page-detalle" class="page-view hidden">
+            <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+                <div class="font-mono text-xs text-slateMuted mb-8 flex items-center gap-2">
+                    <button onclick="navigateTo('inicio')" class="hover:text-champagne">INICIO</button>
+                    <span>/</span>
+                    <button onclick="navigateTo('coleccion')" class="hover:text-champagne">COLECCIÓN FW26</button>
+                    <span>/</span>
+                    <span id="detail-breadcrumb" class="text-champagne">FICHA TÉCNICA</span>
+                </div>
+
+                <div id="product-detail-container" class="bg-obsidian border border-graphite rounded-3xl overflow-hidden">
+                    <!-- Contenido inyectado dinámicamente al seleccionar una prenda -->
+                </div>
+            </section>
+        </div>
+
+        <!-- =================================================================
+             PÁGINA 4: EDICIÓN DE TEMPORADA (BANNERS Y SERIES CURADAS)
+        ================================================================== -->
+        <div id="page-temporada" class="page-view hidden">
+            <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+                <div class="font-mono text-xs text-slateMuted mb-6 flex items-center gap-2">
+                    <button onclick="navigateTo('inicio')" class="hover:text-champagne">INICIO</button>
+                    <span>/</span>
+                    <span class="text-platinum">EDICIÓN DE TEMPORADA</span>
+                </div>
+
+                <div class="mb-12">
+                    <span class="font-mono text-xs text-champagne uppercase tracking-widest">// CURADURÍA INVIERNO 2026</span>
+                    <h1 class="font-display font-extrabold text-3xl sm:text-5xl uppercase tracking-tight text-white mt-1">
+                        EDICIÓN DE TEMPORADA
+                    </h1>
+                    <p class="text-slateMuted text-sm sm:text-base max-w-2xl mt-3 leading-relaxed">
+                        Cápsulas estacionales enfocadas en superposición térmica, resistencia estructural y tonos minerales oscuros.
+                    </p>
+                </div>
+
+                <!-- Banners Llamativos Sobrios -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-14">
+                    <div class="group relative rounded-3xl overflow-hidden border border-graphite bg-obsidian min-h-[360px] flex flex-col justify-between p-8">
+                        <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=900&q=80" 
+                             onerror="this.src='https://placehold.co/800x500/1C1C21/C6A87C?text=SERIE+MONOLITH'"
+                             alt="Serie Monolith de Temporada" 
+                             class="absolute inset-0 w-full h-full object-cover opacity-35 group-hover:scale-105 transition-transform duration-700">
+                        <div class="absolute inset-0 bg-gradient-to-t from-void via-void/75 to-transparent"></div>
+                        
+                        <div class="relative z-10 flex justify-between items-start">
+                            <span class="px-3.5 py-1.5 rounded-lg bg-void/90 border border-champagne/50 text-champagne font-mono font-semibold text-xs uppercase">SERIE MONOLITH</span>
+                            <span class="font-mono text-xs text-slateMuted bg-void/80 px-3 py-1 rounded-lg border border-graphite">EDICIÓN LIMITADA</span>
+                        </div>
+
+                        <div class="relative z-10 mt-20">
+                            <h2 class="font-display font-extrabold text-2xl sm:text-3xl text-white uppercase mb-3">
+                                CONJUNTO ESTRUCTURAL ABYSS & VORTEX
+                            </h2>
+                            <p class="text-platinum/80 text-sm mb-6 max-w-md leading-relaxed">
+                                Combinación de sudadera de algodón French Terry 520 GSM y pantalón cargo de nylon ripstop articulado para movilidad urbana.
+                            </p>
+                            <button onclick="openProductDetail('hoodie-abyss')" class="px-6 py-3 rounded-xl bg-platinum hover:bg-champagne text-void font-mono font-semibold text-xs uppercase tracking-wider transition-colors">
+                                Ver Ficha de la Serie <i class="fa-solid fa-arrow-right ml-1.5"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="group relative rounded-3xl overflow-hidden border border-graphite bg-obsidian min-h-[360px] flex flex-col justify-between p-8">
+                        <img src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=900&q=80" 
+                             onerror="this.src='https://placehold.co/800x500/1C1C21/E4E4E7?text=SERIE+MINERAL+WASH'"
+                             alt="Serie Mineral Wash" 
+                             class="absolute inset-0 w-full h-full object-cover opacity-35 group-hover:scale-105 transition-transform duration-700">
+                        <div class="absolute inset-0 bg-gradient-to-t from-void via-void/75 to-transparent"></div>
+                        
+                        <div class="relative z-10 flex justify-between items-start">
+                            <span class="px-3.5 py-1.5 rounded-lg bg-void/90 border border-zinc-600 text-platinum font-mono font-semibold text-xs uppercase">TEÑIDO MINERAL</span>
+                            <span class="font-mono text-xs text-slateMuted bg-void/80 px-3 py-1 rounded-lg border border-graphite">LOTE 09-B</span>
+                        </div>
+
+                        <div class="relative z-10 mt-20">
+                            <h2 class="font-display font-extrabold text-2xl sm:text-3xl text-white uppercase mb-3">
+                                PRENDAS DE LAVADO ENZIMÁTICO
+                            </h2>
+                            <p class="text-platinum/80 text-sm mb-6 max-w-md leading-relaxed">
+                                Piezas sometidas a procesos de desgaste controlado y pigmentación mineral que otorgan un acabado mate único en cada unidad.
+                            </p>
+                            <button onclick="openProductDetail('zip-cipher')" class="px-6 py-3 rounded-xl bg-void hover:bg-champagne hover:text-void border border-zinc-700 text-platinum font-mono font-semibold text-xs uppercase tracking-wider transition-colors">
+                                Examinar Acabados <i class="fa-solid fa-arrow-right ml-1.5"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- =================================================================
+             PÁGINA 5: LOOKBOOK EDITORIAL (CARRUSEL Y GALERÍA)
+        ================================================================== -->
+        <div id="page-lookbook" class="page-view hidden">
+            <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+                <div class="font-mono text-xs text-slateMuted mb-6 flex items-center gap-2">
+                    <button onclick="navigateTo('inicio')" class="hover:text-champagne">INICIO</button>
+                    <span>/</span>
+                    <span class="text-platinum">LOOKBOOK EDITORIAL</span>
+                </div>
+
+                <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
+                    <div>
+                        <span class="font-mono text-xs text-champagne uppercase tracking-widest">// DOCUMENTACIÓN VISUAL // ARCHIVO 35MM</span>
+                        <h1 class="font-display font-extrabold text-3xl sm:text-5xl uppercase tracking-tight text-white mt-1">
+                            LOOKBOOK NOCTURNO
+                        </h1>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="scrollCarousel('lookbook-carousel', -400)" class="w-11 h-11 rounded-xl bg-obsidian hover:bg-champagne hover:text-void border border-graphite flex items-center justify-center transition-colors" aria-label="Anterior">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+                        <button onclick="scrollCarousel('lookbook-carousel', 400)" class="w-11 h-11 rounded-xl bg-obsidian hover:bg-champagne hover:text-void border border-graphite flex items-center justify-center transition-colors" aria-label="Siguiente">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="lookbook-carousel" class="flex gap-6 overflow-x-auto no-scrollbar scroll-smooth pb-6">
+                    <div class="relative min-w-[290px] sm:min-w-[380px] h-[500px] rounded-3xl overflow-hidden border border-graphite group">
+                        <img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=800&q=80" 
+                             onerror="this.src='https://placehold.co/600x800/121215/C6A87C?text=EDITORIAL+01'"
+                             alt="Editorial urbano 01" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                        <div class="absolute inset-0 bg-gradient-to-t from-void via-transparent to-transparent"></div>
+                        <div class="absolute bottom-6 left-6 right-6 flex items-end justify-between">
+                            <div>
+                                <span class="font-mono text-xs text-champagne">ESTUDIO // 01</span>
+                                <p class="font-display font-bold text-lg text-white">TRÁNSITO SUBTERRÁNEO</p>
+                            </div>
+                            <span class="font-mono text-[11px] bg-void/85 px-2.5 py-1 rounded-lg border border-graphite">SERIE FW26</span>
+                        </div>
+                    </div>
+
+                    <div class="relative min-w-[290px] sm:min-w-[380px] h-[500px] rounded-3xl overflow-hidden border border-graphite group">
+                        <img src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=800&q=80" 
+                             onerror="this.src='https://placehold.co/600x800/121215/E4E4E7?text=EDITORIAL+02'"
+                             alt="Editorial urbano 02" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                        <div class="absolute inset-0 bg-gradient-to-t from-void via-transparent to-transparent"></div>
+                        <div class="absolute bottom-6 left-6 right-6 flex items-end justify-between">
+                            <div>
+                                <span class="font-mono text-xs text-champagne">ESTUDIO // 02</span>
+                                <p class="font-display font-bold text-lg text-white">BRUTALISMO EN CONCRETO</p>
+                            </div>
+                            <span class="font-mono text-[11px] bg-void/85 px-2.5 py-1 rounded-lg border border-graphite">SERIE FW26</span>
+                        </div>
+                    </div>
+
+                    <div class="relative min-w-[290px] sm:min-w-[380px] h-[500px] rounded-3xl overflow-hidden border border-graphite group">
+                        <img src="https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=800&q=80" 
+                             onerror="this.src='https://placehold.co/600x800/121215/C6A87C?text=EDITORIAL+03'"
+                             alt="Editorial urbano 03" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                        <div class="absolute inset-0 bg-gradient-to-t from-void via-transparent to-transparent"></div>
+                        <div class="absolute bottom-6 left-6 right-6 flex items-end justify-between">
+                            <div>
+                                <span class="font-mono text-xs text-champagne">ESTUDIO // 03</span>
+                                <p class="font-display font-bold text-lg text-white">SILUETA MONOCROMÁTICA</p>
+                            </div>
+                            <span class="font-mono text-[11px] bg-void/85 px-2.5 py-1 rounded-lg border border-graphite">ARCHIVO</span>
+                        </div>
+                    </div>
+
+                    <div class="relative min-w-[290px] sm:min-w-[380px] h-[500px] rounded-3xl overflow-hidden border border-graphite group">
+                        <img src="https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=800&q=80" 
+                             onerror="this.src='https://placehold.co/600x800/121215/E4E4E7?text=EDITORIAL+04'"
+                             alt="Editorial urbano 04" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                        <div class="absolute inset-0 bg-gradient-to-t from-void via-transparent to-transparent"></div>
+                        <div class="absolute bottom-6 left-6 right-6 flex items-end justify-between">
+                            <div>
+                                <span class="font-mono text-xs text-champagne">ESTUDIO // 04</span>
+                                <p class="font-display font-bold text-lg text-white">SECTOR INDUSTRIAL</p>
+                            </div>
+                            <span class="font-mono text-[11px] bg-void/85 px-2.5 py-1 rounded-lg border border-graphite">DROP 09</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- =================================================================
+             PÁGINA 6: TRAYECTORIA DE LA MARCA
+        ================================================================== -->
+        <div id="page-trayectoria" class="page-view hidden">
+            <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+                <div class="font-mono text-xs text-slateMuted mb-6 flex items-center gap-2">
+                    <button onclick="navigateTo('inicio')" class="hover:text-champagne">INICIO</button>
+                    <span>/</span>
+                    <span class="text-platinum">TRAYECTORIA DE MARCA</span>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+                    <div class="lg:col-span-5 bg-obsidian p-8 rounded-3xl border border-graphite">
+                        <span class="font-mono text-xs text-champagne uppercase tracking-widest">// MANIFIESTO & ADN</span>
+                        <h1 class="font-display font-extrabold text-3xl sm:text-4xl uppercase tracking-tight text-white mt-2 mb-6">
+                            UNA DÉCADA DE ARQUITECTURA TEXTIL
+                        </h1>
+                        <p class="text-platinum/90 text-sm leading-relaxed mb-5">
+                            <strong>KRYPTIC ARCHIVE</strong> fue fundada en 2016 como un taller independiente dedicado al estudio de la proporción, el peso textil y la durabilidad en la indumentaria urbana.
+                        </p>
+                        <p class="text-slateMuted text-sm leading-relaxed mb-8">
+                            Rechazamos la producción masiva estacional. Cada pieza se desarrolla mediante patronaje propio, utilizando algodones de fibra larga y textiles técnicos seleccionados por su resistencia al desgaste.
+                        </p>
+
+                        <div class="grid grid-cols-3 gap-4 pt-6 border-t border-graphite">
+                            <div>
+                                <span class="font-display font-extrabold text-2xl text-champagne block">2016</span>
+                                <span class="font-mono text-[10px] text-slateMuted uppercase">Fundación</span>
+                            </div>
+                            <div>
+                                <span class="font-display font-extrabold text-2xl text-white block">520g</span>
+                                <span class="font-mono text-[10px] text-slateMuted uppercase">Gramaje Base</span>
+                            </div>
+                            <div>
+                                <span class="font-display font-extrabold text-2xl text-white block">100%</span>
+                                <span class="font-mono text-[10px] text-slateMuted uppercase">Diseño Propio</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-7 space-y-6">
+                        <div class="p-7 rounded-3xl bg-obsidian border border-graphite">
+                            <div class="font-mono font-semibold text-champagne text-sm mb-2">2016 // FASE 01 — TALLER EXPERIMENTAL</div>
+                            <h2 class="font-display font-bold text-xl text-white uppercase mb-2">Primeras Ediciones Serigrafiadas</h2>
+                            <p class="text-sm text-slateMuted leading-relaxed">
+                                Inicio de operaciones con tirajes limitados de 50 unidades numeradas a mano, enfocadas en tintas de alta densidad y tejidos de alto espesor.
+                            </p>
+                        </div>
+
+                        <div class="p-7 rounded-3xl bg-obsidian border border-graphite">
+                            <div class="font-mono font-semibold text-champagne text-sm mb-2">2020 // FASE 02 — LABORATORIO DE PATRONAJE</div>
+                            <h2 class="font-display font-bold text-xl text-white uppercase mb-2">Desarrollo de Moldería Exclusiva</h2>
+                            <p class="text-sm text-slateMuted leading-relaxed">
+                                Transición completa hacia cortes propietarios (boxy-fit estructural y pantalones articulados), incorporando herrajes metálicos personalizados y costuras reforzadas.
+                            </p>
+                        </div>
+
+                        <div class="p-7 rounded-3xl bg-obsidian border border-champagne/40">
+                            <div class="font-mono font-semibold text-champagne text-sm mb-2">2026 // FASE 03 — ARCHIVO INTERNACIONAL</div>
+                            <h2 class="font-display font-bold text-xl text-white uppercase mb-2">Consolidación & Cápsula FW26</h2>
+                            <p class="text-sm text-slateMuted leading-relaxed">
+                                Exhibiciones privadas en Ciudad de México, Tokio y Berlín, manteniendo nuestra independencia creativa y estándares rigurosos de trazabilidad textil.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- =================================================================
+             PÁGINA 7: COMUNIDAD & RESEÑAS (CON FORMULARIO DE DOBLE CONSENTIMIENTO)
+        ================================================================== -->
+        <div id="page-comunidad" class="page-view hidden">
+            <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+                <div class="font-mono text-xs text-slateMuted mb-6 flex items-center gap-2">
+                    <button onclick="navigateTo('inicio')" class="hover:text-champagne">INICIO</button>
+                    <span>/</span>
+                    <span class="text-platinum">COMUNIDAD & RESEÑAS</span>
+                </div>
+
+                <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+                    <div>
+                        <span class="font-mono text-xs text-champagne uppercase tracking-widest">// TESTIMONIOS DE PORTADORES</span>
+                        <h1 class="font-display font-extrabold text-3xl sm:text-5xl uppercase tracking-tight text-white mt-1">
+                            RESEÑAS DE ARCHIVO
+                        </h1>
+                    </div>
+
+                    <div class="flex items-center gap-4 bg-obsidian px-5 py-3.5 rounded-2xl border border-graphite">
+                        <div class="text-champagne text-sm space-x-0.5">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        </div>
+                        <div class="font-mono text-xs">
+                            <span class="text-white font-bold text-sm">4.9 / 5.0</span>
+                            <span class="text-slateMuted block">Valoración verificada</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grid de Reseñas -->
+                <div id="reviews-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                    <div class="p-6 rounded-3xl bg-obsidian border border-graphite flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="text-champagne text-xs space-x-0.5">
+                                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                                </div>
+                                <span class="font-mono text-[11px] text-platinum bg-graphite px-2.5 py-0.5 rounded-md">Verificado</span>
+                            </div>
+                            <h3 class="font-display font-bold text-white text-base mb-2">"Construcción textil impecable"</h3>
+                            <p class="text-sm text-slateMuted leading-relaxed mb-6">
+                                La estructura del algodón de 520 GSM mantiene la caída arquitectónica de los hombros incluso después de meses de uso continuo.
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-3 pt-4 border-t border-graphite">
+                            <div class="w-9 h-9 rounded-full bg-graphite border border-champagne/40 text-champagne font-mono font-bold text-xs flex items-center justify-center">DM</div>
+                            <div>
+                                <p class="text-xs font-bold text-white">Diego M.</p>
+                                <p class="font-mono text-[11px] text-slateMuted">Ciudad de México</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-6 rounded-3xl bg-obsidian border border-graphite flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="text-champagne text-xs space-x-0.5">
+                                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                                </div>
+                                <span class="font-mono text-[11px] text-platinum bg-graphite px-2.5 py-0.5 rounded-md">Verificado</span>
+                            </div>
+                            <h3 class="font-display font-bold text-white text-base mb-2">"Patronaje ergonómico superior"</h3>
+                            <p class="text-sm text-slateMuted leading-relaxed mb-6">
+                                Los pantalones Vortex tienen una articulación en rodillas muy cómoda y el tejido ripstop resiste perfectamente el uso diario en ciudad.
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-3 pt-4 border-t border-graphite">
+                            <div class="w-9 h-9 rounded-full bg-graphite border border-zinc-600 text-platinum font-mono font-bold text-xs flex items-center justify-center">VR</div>
+                            <div>
+                                <p class="text-xs font-bold text-white">Valeria R.</p>
+                                <p class="font-mono text-[11px] text-slateMuted">Guadalajara</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-6 rounded-3xl bg-obsidian border border-graphite flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="text-champagne text-xs space-x-0.5">
+                                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                                </div>
+                                <span class="font-mono text-[11px] text-platinum bg-graphite px-2.5 py-0.5 rounded-md">Verificado</span>
+                            </div>
+                            <h3 class="font-display font-bold text-white text-base mb-2">"Protección climática real"</h3>
+                            <p class="text-sm text-slateMuted leading-relaxed mb-6">
+                                La chaqueta Spectre cumple exactamente con lo descrito en su ficha técnica: repelencia total al agua y transpirabilidad equilibrada.
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-3 pt-4 border-t border-graphite">
+                            <div class="w-9 h-9 rounded-full bg-graphite border border-zinc-600 text-platinum font-mono font-bold text-xs flex items-center justify-center">AK</div>
+                            <div>
+                                <p class="text-xs font-bold text-white">Alejandro K.</p>
+                                <p class="font-mono text-[11px] text-slateMuted">Monterrey</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Formulario de Reseña con Minimización de Datos y Dos Casillas Separadas -->
+                <div class="bg-obsidian border border-graphite rounded-3xl p-6 sm:p-8 max-w-3xl">
+                    <span class="font-mono text-[11px] text-champagne uppercase tracking-widest">// FORMULARIO CON MINIMIZACIÓN DE DATOS (LFPDPPP)</span>
+                    <h2 class="font-display font-bold text-xl text-white uppercase mt-1 mb-2">Publicar Reseña de Prenda</h2>
+                    <p class="text-xs text-slateMuted mb-6">
+                        En cumplimiento con el principio de proporcionalidad de datos personales, únicamente solicitamos un alias público y su comentario sobre la calidad de la prenda. No recopilamos correo electrónico ni teléfono en este formulario.
+                    </p>
+
+                    <form id="review-form" class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label for="rev-name" class="block font-mono text-[11px] text-slateMuted uppercase mb-1.5">Nombre o Alias Público *</label>
+                                <input type="text" id="rev-name" required maxlength="40" placeholder="Ej. Carlos M." class="w-full px-4 py-3 rounded-xl bg-void border border-graphite focus:border-champagne outline-none text-sm text-white">
+                            </div>
+                            <div>
+                                <label for="rev-piece" class="block font-mono text-[11px] text-slateMuted uppercase mb-1.5">Prenda Evaluada *</label>
+                                <select id="rev-piece" required class="w-full px-4 py-3 rounded-xl bg-void border border-graphite focus:border-champagne outline-none text-sm text-white">
+                                    <option value="Hoodie Abyss 520GSM">Hoodie "Abyss" Heavyweight</option>
+                                    <option value="Cargo Pants Vortex">Cargo Pants "Vortex" 8-Pocket</option>
+                                    <option value="Chaqueta Spectre Tech-Shell">Chaqueta "Spectre" Tech-Shell</option>
+                                    <option value="Full-Zip Cipher Distressed">Full-Zip "Cipher" Distressed</option>
+                                    <option value="Bomber Obsidian MA-1">Bomber "Obsidian" MA-1</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="rev-comment" class="block font-mono text-[11px] text-slateMuted uppercase mb-1.5">Experiencia con la prenda *</label>
+                            <textarea id="rev-comment" rows="3" required maxlength="300" placeholder="Describe el ajuste, confección o materiales..." class="w-full px-4 py-3 rounded-xl bg-void border border-graphite focus:border-champagne outline-none text-sm text-white"></textarea>
+                        </div>
+
+                        <!-- DOS CASILLAS DE CONSENTIMIENTO SEPARADAS CON ENLACES DIRECTOS -->
+                        <div class="space-y-3 pt-2 border-t border-graphite">
+                            <label class="flex items-start gap-3 cursor-pointer text-xs text-slateMuted">
+                                <input type="checkbox" id="rev-check-terms" required class="mt-0.5 w-4 h-4 rounded border-zinc-600 bg-void accent-[#C6A87C]">
+                                <span>
+                                    He leído y acepto los 
+                                    <button type="button" onclick="navigateTo('legal', 'terminos')" class="text-champagne underline hover:text-white font-medium">Términos y Condiciones</button> 
+                                    y el Aviso de Privacidad para la publicación de esta reseña. *
+                                </span>
+                            </label>
+
+                            <label class="flex items-start gap-3 cursor-pointer text-xs text-slateMuted">
+                                <input type="checkbox" id="rev-check-cookies" required class="mt-0.5 w-4 h-4 rounded border-zinc-600 bg-void accent-[#C6A87C]">
+                                <span>
+                                    Consiento el uso de almacenamiento técnico y acepto la 
+                                    <button type="button" onclick="navigateTo('legal', 'cookies')" class="text-champagne underline hover:text-white font-medium">Política de Cookies</button> 
+                                    para registrar esta interacción. *
+                                </span>
+                            </label>
+                        </div>
+
+                        <button type="submit" class="px-6 py-3.5 rounded-xl bg-platinum hover:bg-champagne text-void font-mono font-semibold text-xs uppercase tracking-wider transition-colors">
+                            Enviar Reseña y Registrar Consentimiento
+                        </button>
+                    </form>
+                </div>
+            </section>
+        </div>
+
+        <!-- =================================================================
+             PÁGINA 8: MARCO LEGAL INTEGRAL (MÉXICO: LFPDPPP, LFPC, INDAUTOR)
+        ================================================================== -->
+        <div id="page-legal" class="page-view hidden">
+            <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+                <div class="font-mono text-xs text-slateMuted mb-6 flex items-center gap-2">
+                    <button onclick="navigateTo('inicio')" class="hover:text-champagne">INICIO</button>
+                    <span>/</span>
+                    <span class="text-platinum">MARCO LEGAL Y CUMPLIMIENTO NORMATIVO</span>
+                </div>
+
+                <div class="mb-10">
+                    <span class="font-mono text-xs text-champagne uppercase tracking-widest">// CUMPLIMIENTO NORMATIVO — ESTADOS UNIDOS MEXICANOS</span>
+                    <h1 class="font-display font-extrabold text-3xl sm:text-5xl uppercase tracking-tight text-white mt-1">
+                        DOCUMENTACIÓN LEGAL
+                    </h1>
+                    <p class="text-sm text-slateMuted mt-2 max-w-3xl">
+                        Documentos redactados conforme a la Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP), los Lineamientos del Aviso de Privacidad, la Ley Federal de Protección al Consumidor (LFPC) y la Ley Federal del Derecho de Autor (LFDA).
+                    </p>
+                </div>
+
+                <!-- Pestañas de Documentos Legales -->
+                <div class="flex flex-wrap gap-2 mb-8 pb-4 border-b border-graphite font-mono text-xs">
+                    <button onclick="switchLegalTab('terminos')" data-legal-tab="terminos" class="legal-tab-btn px-4 py-2.5 rounded-xl bg-champagne text-void font-semibold">
+                        1. Términos y Condiciones
+                    </button>
+                    <button onclick="switchLegalTab('privacidad')" data-legal-tab="privacidad" class="legal-tab-btn px-4 py-2.5 rounded-xl bg-obsidian border border-graphite text-slateMuted hover:text-white">
+                        2. Política de Privacidad (LFPDPPP)
+                    </button>
+                    <button onclick="switchLegalTab('cookies')" data-legal-tab="cookies" class="legal-tab-btn px-4 py-2.5 rounded-xl bg-obsidian border border-graphite text-slateMuted hover:text-white">
+                        3. Política de Cookies
+                    </button>
+                    <button onclick="switchLegalTab('reembolso')" data-legal-tab="reembolso" class="legal-tab-btn px-4 py-2.5 rounded-xl bg-obsidian border border-graphite text-slateMuted hover:text-white">
+                        4. Política de Reembolso y Garantías
+                    </button>
+                    <button onclick="switchLegalTab('licencias')" data-legal-tab="licencias" class="legal-tab-btn px-4 py-2.5 rounded-xl bg-obsidian border border-graphite text-slateMuted hover:text-white">
+                        5. Derechos de Autor e Imágenes
+                    </button>
+                </div>
+
+                <!-- Contenido de Documentos Legales -->
+                <div class="bg-obsidian border border-graphite rounded-3xl p-8 sm:p-10 text-sm text-slateMuted leading-relaxed space-y-6">
+                    
+                    <!-- TAB 1: TÉRMINOS Y CONDICIONES -->
+                    <div id="legal-content-terminos" class="legal-panel space-y-4">
+                        <div class="flex items-center justify-between border-b border-graphite pb-4">
+                            <h2 class="font-display font-bold text-2xl text-white uppercase">Términos y Condiciones de Uso</h2>
+                            <span class="font-mono text-xs text-champagne">VERSIÓN 2.4 // VIGENTE 2026</span>
+                        </div>
+                        <p><strong class="text-white">1. Naturaleza del Sitio:</strong> El presente portal digital ("KRYPTIC ARCHIVE") opera exclusivamente como catálogo editorial, exhibición técnica de indumentaria y archivo histórico de marca. Este sitio web no constituye una plataforma de comercio electrónico transaccional directa ni procesa pagos en línea.</p>
+                        <p><strong class="text-white">2. Propiedad Industrial e Intelectual:</strong> La denominación "KRYPTIC ARCHIVE", su emblema geométrico, fichas técnicas, patronajes y textos descriptivos son propiedad exclusiva de KRYPTIC ARCHIVE STUDIO S.A.S. de C.V., protegidos por la Ley Federal de Protección a la Propiedad Industrial y la Ley Federal del Derecho de Autor en México.</p>
+                        <p><strong class="text-white">3. Exactitud de las Especificaciones:</strong> Las descripciones textiles (gramajes, composición de fibras y acabados) corresponden a las especificaciones de fabricación de cada lote. Debido a los procesos artesanales de lavado enzimático y teñido mineral, pueden existir variaciones tonales menores inherentes a cada pieza.</p>
+                        <p><strong class="text-white">4. Conducta del Usuario en la Comunidad:</strong> Al publicar una reseña, el usuario garantiza que su opinión es verídica, respetuosa y libre de contenido difamatorio, ilícito o publicitario. KRYPTIC ARCHIVE se reserva el derecho de moderar comentarios que infrinjan estas disposiciones.</p>
+                        <p><strong class="text-white">5. Legislación Aplicable y Jurisdicción:</strong> Para la interpretación y cumplimiento de estos Términos y Condiciones, las partes se someten expresamente a las leyes federales vigentes en los Estados Unidos Mexicanos y a la jurisdicción de los tribunales competentes en Ciudad Madero, Tamaulipas / Ciudad de México, renunciando a cualquier otro fuero.</p>
+                    </div>
+
+                    <!-- TAB 2: POLÍTICA DE PRIVACIDAD (LFPDPPP) -->
+                    <div id="legal-content-privacidad" class="legal-panel hidden space-y-4">
+                        <div class="flex items-center justify-between border-b border-graphite pb-4">
+                            <h2 class="font-display font-bold text-2xl text-white uppercase">Aviso Integral de Privacidad (LFPDPPP)</h2>
+                            <span class="font-mono text-xs text-champagne">LEY FEDERAL DE PROTECCIÓN DE DATOS</span>
+                        </div>
+                        <p><strong class="text-white">1. Identidad y Domicilio del Responsable:</strong> KRYPTIC ARCHIVE STUDIO, con domicilio operacional en Ciudad Madero, Tamaulipas, México, es responsable del tratamiento y protección de sus datos personales conforme a los artículos 15 y 16 de la Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP).</p>
+                        <p><strong class="text-white">2. Principio de Minimización (Datos Recabados):</strong> Aplicamos estrictamente el principio de proporcionalidad. Únicamente solicitamos los datos mínimos indispensables para cada interacción:</p>
+                        <ul class="list-disc pl-6 space-y-1 text-platinum/90">
+                            <li><strong>Para suscripción al boletín informativo:</strong> Exclusivamente su dirección de correo electrónico.</li>
+                            <li><strong>Para publicación de reseñas:</strong> Únicamente un alias o nombre público y su opinión sobre la prenda.</li>
+                            <li><em>No recabamos datos personales sensibles, patrimoniales, financieros ni biométricos.</em></li>
+                        </ul>
+                        <p><strong class="text-white">3. Finalidades del Tratamiento:</strong> Sus datos serán tratados únicamente para: (a) enviar notificaciones sobre lanzamientos de archivo cuando usted lo haya solicitado expresamente; y (b) mostrar su testimonio en el muro público de la comunidad.</p>
+                        <p><strong class="text-white">4. Derechos ARCO (Acceso, Rectificación, Cancelación y Oposición):</strong> Usted tiene derecho a conocer qué datos tenemos de usted, solicitar su corrección, pedir su eliminación de nuestros registros o revocar su consentimiento en cualquier momento enviando una solicitud al correo oficial: <span class="text-champagne font-mono">privacidad@krypticarchive.mx</span>, la cual será atendida en un plazo máximo de 20 días hábiles conforme al artículo 32 de la LFPDPPP.</p>
+                    </div>
+
+                    <!-- TAB 3: POLÍTICA DE COOKIES -->
+                    <div id="legal-content-cookies" class="legal-panel hidden space-y-4">
+                        <div class="flex items-center justify-between border-b border-graphite pb-4">
+                            <h2 class="font-display font-bold text-2xl text-white uppercase">Política de Cookies y Tecnologías de Rastreo</h2>
+                            <span class="font-mono text-xs text-champagne">CONSENTIMIENTO EXPRESO REQUERIDO</span>
+                        </div>
+                        <p><strong class="text-white">1. ¿Por qué solicitamos su consentimiento?</strong> De conformidad con los Lineamientos del Aviso de Privacidad publicados en el Diario Oficial de la Federación (DOF) y estándares internacionales de privacidad digital, todo sitio web que utilice cookies o almacenamiento local para recordar preferencias o analizar tráfico debe informar de manera clara y recabar el <strong>consentimiento previo, libre e informado</strong> del usuario antes de activar cookies no esenciales.</p>
+                        <p><strong class="text-white">2. Clasificación de Tecnologías Utilizadas:</strong></p>
+                        <ul class="list-disc pl-6 space-y-1 text-platinum/90">
+                            <li><strong>Cookies Técnicas / Esenciales (Siempre activas):</strong> Necesarias para la navegación entre secciones internas y para almacenar la bitácora legal de su consentimiento.</li>
+                            <li><strong>Cookies de Preferencias y Analítica (Requieren aceptación expresa):</strong> Permiten recordar filtros de colección seleccionados y medir el rendimiento de las vistas editoriales de forma anónima.</li>
+                        </ul>
+                        <p><strong class="text-white">3. Revocación o Modificación:</strong> Puede modificar o revocar su consentimiento de cookies en cualquier momento haciendo clic en el botón <button onclick="openCookieBanner()" class="text-champagne underline">Configurar Cookies</button> ubicado en la barra superior.</p>
+                    </div>
+
+                    <!-- TAB 4: POLÍTICA DE REEMBOLSO Y GARANTÍAS -->
+                    <div id="legal-content-reembolso" class="legal-panel hidden space-y-4">
+                        <div class="flex items-center justify-between border-b border-graphite pb-4">
+                            <h2 class="font-display font-bold text-2xl text-white uppercase">Política de Reembolso, Cambios y Garantías</h2>
+                            <span class="font-mono text-xs text-champagne">CONFORME A LA LFPC (MÉXICO)</span>
+                        </div>
+                        <p><strong class="text-white">1. Alcance:</strong> Aunque este sitio web funciona exclusivamente como catálogo informativo sin venta directa en línea, las siguientes condiciones rigen para toda adquisición realizada en nuestras exhibiciones físicas (Pop-Ups) o mediante pedidos personalizados coordinados por canales oficiales, en estricto apego a la Ley Federal de Protección al Consumidor (LFPC).</p>
+                        <p><strong class="text-white">2. Garantía Legal por Defectos de Fabricación (Art. 77 y 92 LFPC):</strong> Todas las prendas de KRYPTIC ARCHIVE cuentan con una garantía mínima de <strong>90 días naturales</strong> contados a partir de la entrega contra defectos de confección, fallas en costuras, cierres o desprendimiento anormal de estampados. En caso de defecto comprobado, el portador podrá optar por la reposición de la pieza o el reembolso íntegro del importe pagado.</p>
+                        <p><strong class="text-white">3. Cambios de Talla y Devoluciones Voluntarias:</strong> Se aceptan cambios de talla o devoluciones dentro de los <strong>15 días naturales</strong> posteriores a la recepción de la prenda, siempre que esta se encuentre sin uso, sin lavar, sin olores ajenos y con todas sus etiquetas de archivo y empaque original intactos.</p>
+                        <p><strong class="text-white">4. Proceso de Reembolso:</strong> Una vez recibida e inspeccionada la prenda en nuestro taller (en un plazo no mayor a 5 días hábiles), el reembolso se efectuará por el mismo método de pago utilizado originalmente en un lapso de 3 a 7 días hábiles.</p>
+                    </div>
+
+                    <!-- TAB 5: DERECHOS DE AUTOR Y LICENCIAS DE IMÁGENES -->
+                    <div id="legal-content-licencias" class="legal-panel hidden space-y-4">
+                        <div class="flex items-center justify-between border-b border-graphite pb-4">
+                            <h2 class="font-display font-bold text-2xl text-white uppercase">Verificación de Licencias y Derechos de Imágenes</h2>
+                            <span class="font-mono text-xs text-champagne">AUDITORÍA DE PROPIEDAD INTELECTUAL</span>
+                        </div>
+                        <p><strong class="text-white">1. Cumplimiento con la Ley Federal del Derecho de Autor (LFDA):</strong> Todas las fotografías, gráficos vectoriales y recursos visuales desplegados en este sitio web cuentan con autorización legal expresa para su uso comercial y editorial sin atribución obligatoria restringida, evitando cualquier infracción de derechos de terceros.</p>
+                        <div class="overflow-x-auto pt-2">
+                            <table class="w-full text-left font-mono text-xs border border-graphite rounded-xl overflow-hidden">
+                                <thead class="bg-void text-champagne border-b border-graphite">
+                                    <tr>
+                                        <th class="p-3">Recurso Visual</th>
+                                        <th class="p-3">Origen / Autoría</th>
+                                        <th class="p-3">Tipo de Licencia</th>
+                                        <th class="p-3">Estado Legal</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-graphite text-platinum/90">
+                                    <tr>
+                                        <td class="p-3">Logotipo "KRYPTIC ARCHIVE"</td>
+                                        <td class="p-3">Creación original SVG del estudio</td>
+                                        <td class="p-3">Propiedad Exclusiva / Obra Original</td>
+                                        <td class="p-3 text-champagne">✔ Verificado</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3">Fotografías Editorial Hero y Lookbook</td>
+                                        <td class="p-3">Banco Fotográfico Unsplash (Colección Curada)</td>
+                                        <td class="p-3">Licencia Unsplash (Uso comercial/editorial libre)</td>
+                                        <td class="p-3 text-champagne">✔ Verificado</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3">Fotografías de Catálogo de Prendas</td>
+                                        <td class="p-3">Banco Fotográfico Unsplash (Colección Curada)</td>
+                                        <td class="p-3">Licencia Unsplash (Uso comercial/editorial libre)</td>
+                                        <td class="p-3 text-champagne">✔ Verificado</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3">Iconografía de Interfaz</td>
+                                        <td class="p-3">Font Awesome Free 6.5</td>
+                                        <td class="p-3">Licencia CC BY 4.0 / SIL OFL 1.1</td>
+                                        <td class="p-3 text-champagne">✔ Verificado</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+        </div>
+
+    </main>
+
+    <!-- =====================================================================
+         FOOTER CORPORATIVO SOBRIO + SUSCRIPCIÓN CON DOBLE CONSENTIMIENTO
+    ====================================================================== -->
+    <footer class="bg-obsidian border-t border-graphite pt-14 pb-10 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <!-- Formulario de Boletín con Minimización de Datos y 2 Casillas Separadas -->
+            <div class="rounded-3xl bg-void border border-graphite p-8 sm:p-10 mb-14 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <div class="lg:col-span-6">
+                    <span class="font-mono text-xs text-champagne uppercase tracking-widest">// BOLETÍN DE ARCHIVO</span>
+                    <h3 class="font-display font-extrabold text-2xl sm:text-3xl text-white uppercase mt-1 mb-2">
+                        NOTIFICACIONES DE NUEVOS LANZAMIENTOS
+                    </h3>
+                    <p class="text-xs sm:text-sm text-slateMuted leading-relaxed">
+                        Solicitamos únicamente su correo electrónico para notificarle cuando se publiquen nuevas fichas técnicas en el archivo. Sin envíos publicitarios de terceros.
+                    </p>
+                </div>
+
+                <form id="newsletter-form" class="lg:col-span-6 space-y-3">
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <input type="email" id="news-email" required placeholder="correo@dominio.com" class="flex-1 px-4 py-3.5 rounded-xl bg-obsidian border border-graphite focus:border-champagne outline-none text-sm text-white">
+                        <button type="submit" class="px-6 py-3.5 rounded-xl bg-platinum hover:bg-champagne text-void font-mono font-semibold text-xs uppercase tracking-wider transition-colors shrink-0">
+                            Suscribirme
+                        </button>
+                    </div>
+
+                    <!-- Dos Casillas Separadas con Links Directos -->
+                    <div class="space-y-2 pt-1">
+                        <label class="flex items-start gap-2.5 cursor-pointer text-[11px] text-slateMuted">
+                            <input type="checkbox" id="news-check-terms" required class="mt-0.5 w-3.5 h-3.5 rounded bg-obsidian accent-[#C6A87C]">
+                            <span>
+                                Acepto los <button type="button" onclick="navigateTo('legal', 'terminos')" class="text-champagne underline">Términos y Condiciones</button> y el Aviso de Privacidad. *
+                            </span>
+                        </label>
+                        <label class="flex items-start gap-2.5 cursor-pointer text-[11px] text-slateMuted">
+                            <input type="checkbox" id="news-check-cookies" required class="mt-0.5 w-3.5 h-3.5 rounded bg-obsidian accent-[#C6A87C]">
+                            <span>
+                                Acepto la <button type="button" onclick="navigateTo('legal', 'cookies')" class="text-champagne underline">Política de Cookies</button> para gestionar mi suscripción. *
+                            </span>
+                        </label>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Enlaces del Footer -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-10 pb-10 border-b border-graphite">
+                <div class="md:col-span-2">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-8 h-8 bg-void border border-champagne/60 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-champagne" viewBox="0 0 32 32" fill="none">
+                                <path d="M4 4H12V13L21 4H28L17 15.5L28 28H20.5L12 18.5V28H4V4Z" fill="currentColor"/>
+                            </svg>
+                        </div>
+                        <span class="font-display font-extrabold text-lg text-white">KRYPTIC ARCHIVE</span>
+                    </div>
+                    <p class="text-xs sm:text-sm text-slateMuted max-w-sm leading-relaxed">
+                        Estudio independiente de indumentaria técnica y sastrería contemporánea. Ciudad Madero, Tamaulipas / Ciudad de México.
+                    </p>
+                </div>
+
+                <div>
+                    <h4 class="font-mono font-semibold text-xs text-white uppercase tracking-widest mb-4">Archivo</h4>
+                    <ul class="space-y-2 text-xs sm:text-sm text-slateMuted">
+                        <li><button onclick="navigateTo('coleccion')" class="hover:text-champagne transition-colors">Colección FW26</button></li>
+                        <li><button onclick="navigateTo('temporada')" class="hover:text-champagne transition-colors">Edición de Temporada</button></li>
+                        <li><button onclick="navigateTo('lookbook')" class="hover:text-champagne transition-colors">Lookbook Editorial</button></li>
+                        <li><button onclick="navigateTo('trayectoria')" class="hover:text-champagne transition-colors">Trayectoria</button></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-mono font-semibold text-xs text-white uppercase tracking-widest mb-4">Marco Legal</h4>
+                    <ul class="space-y-2 text-xs sm:text-sm text-slateMuted">
+                        <li><button onclick="navigateTo('legal', 'terminos')" class="hover:text-champagne transition-colors">Términos y Condiciones</button></li>
+                        <li><button onclick="navigateTo('legal', 'privacidad')" class="hover:text-champagne transition-colors">Política de Privacidad</button></li>
+                        <li><button onclick="navigateTo('legal', 'cookies')" class="hover:text-champagne transition-colors">Política de Cookies</button></li>
+                        <li><button onclick="navigateTo('legal', 'reembolso')" class="hover:text-champagne transition-colors">Política de Reembolso</button></li>
+                        <li><button onclick="navigateTo('legal', 'licencias')" class="hover:text-champagne transition-colors">Licencias de Imágenes</button></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-[11px] text-slateMuted">
+                <p>© 2026 KRYPTIC ARCHIVE STUDIO. TODOS LOS DERECHOS RESERVADOS.</p>
+                <button onclick="openAuditModal()" class="text-champagne hover:underline">
+                    Ver Registro de Consentimientos (Auditoría LFPDPPP)
+                </button>
+            </div>
+        </div>
+    </footer>
+
+    <!-- =====================================================================
+         BANNER DE CONSENTIMIENTO DE COOKIES (OBLIGATORIO ANTES DE RASTREO)
+    ====================================================================== -->
+    <div id="cookie-banner" class="fixed bottom-4 left-4 right-4 z-50 max-w-4xl mx-auto bg-obsidian/95 backdrop-blur-xl border border-champagne/50 rounded-2xl p-6 shadow-2xl hidden">
+        <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+            <div class="space-y-2">
+                <div class="flex items-center gap-2 font-mono text-xs text-champagne uppercase">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span>Aviso de Privacidad & Gestión de Cookies</span>
+                </div>
+                <p class="text-xs sm:text-sm text-slateMuted leading-relaxed">
+                    Utilizamos cookies técnicas esenciales para el funcionamiento del catálogo y cookies opcionales de preferencias. Conforme a la legislación mexicana de protección de datos, requerimos su consentimiento expreso. Consulte nuestra 
+                    <button onclick="navigateTo('legal', 'cookies')" class="text-champagne underline">Política de Cookies</button> y 
+                    <button onclick="navigateTo('legal', 'privacidad')" class="text-champagne underline">Política de Privacidad</button>.
+                </p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2.5 shrink-0 w-full lg:w-auto justify-end">
+                <button onclick="handleCookieDecision('Solo Esenciales (Rechazar Opcionales)')" class="px-4 py-2.5 rounded-xl bg-void hover:bg-graphite border border-graphite text-xs font-mono text-slateMuted hover:text-white transition-colors">
+                    Solo Esenciales
+                </button>
+                <button onclick="handleCookieDecision('Aceptar Todas las Cookies')" class="px-5 py-2.5 rounded-xl bg-champagne hover:bg-amber-200 text-void font-mono font-semibold text-xs transition-colors">
+                    Aceptar Cookies
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================================
+         MODAL DE BITÁCORA / AUDITORÍA DE CONSENTIMIENTOS REGISTRADOS
+    ====================================================================== -->
+    <div id="audit-modal" class="fixed inset-0 z-50 hidden">
+        <div onclick="closeAuditModal()" class="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
+        <div class="relative z-10 max-w-3xl mx-auto mt-16 mx-4 bg-obsidian border border-graphite rounded-3xl p-6 sm:p-8 shadow-2xl">
+            <div class="flex items-center justify-between pb-4 border-b border-graphite">
+                <div>
+                    <span class="font-mono text-[11px] text-champagne uppercase">REGISTRO DE CUMPLIMIENTO // LFPDPPP</span>
+                    <h3 class="font-display font-bold text-xl text-white uppercase">Bitácora de Consentimientos Otorgados</h3>
+                </div>
+                <button onclick="closeAuditModal()" class="w-9 h-9 rounded-xl bg-void border border-graphite text-slateMuted hover:text-white flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <p class="text-xs text-slateMuted mt-3 mb-4">
+                Cada aceptación de cookies, términos y condiciones o aviso de privacidad queda registrada con marca de tiempo ISO-8601, método de aceptación y versión legal vigente como prueba verificable de consentimiento.
+            </p>
+            <div id="audit-log-list" class="max-h-72 overflow-y-auto space-y-2.5 font-mono text-xs bg-void p-4 rounded-2xl border border-graphite">
+                <!-- Registros inyectados dinámicamente -->
+            </div>
+            <div class="mt-5 flex justify-between items-center">
+                <button onclick="exportAuditLog()" class="px-4 py-2.5 rounded-xl bg-graphite hover:bg-champagne hover:text-void text-platinum font-mono text-xs transition-colors">
+                    <i class="fa-solid fa-download mr-1.5"></i> Exportar Registro (.JSON)
+                </button>
+                <button onclick="closeAuditModal()" class="px-5 py-2.5 rounded-xl bg-platinum text-void font-mono font-semibold text-xs">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================================
+         NOTIFICACIÓN TOAST SOBRIA
+    ====================================================================== -->
+    <div id="toast-notification" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="bg-obsidian border border-champagne/60 text-platinum px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 font-mono text-xs">
+            <span class="w-2 h-2 rounded-full bg-champagne"></span>
+            <span id="toast-message">Acción registrada</span>
+        </div>
+    </div>
+
+    <!-- =====================================================================
+         JAVASCRIPT: CATÁLOGO SIN PRECIOS, NAVEGACIÓN SPA Y AUDITORÍA LEGAL
+    ====================================================================== -->
+    <script>
+        // 1. BASE DE DATOS DE PRENDAS (SIN PRECIOS — SOLO IMAGEN, TÍTULO Y DESCRIPCIÓN)
+        const catalogItems = [
+            {
+                id: 'hoodie-abyss',
+                code: 'KRP-HD-01 // BOXY FIT',
+                category: 'hoodies',
+                categoryLabel: 'Hoodies',
+                name: 'Hoodie "Abyss" Heavyweight',
+                shortDesc: 'Sudadera estructurada de algodón French Terry de 520 GSM con lavado enzimático mate y capucha de doble capa.',
+                fullDesc: 'Confeccionada en algodón orgánico de fibra larga de 520 gramos por metro cuadrado. Su patrón arquitectónico presenta hombros caídos, ribetes de alta densidad en puños y cintura, y capucha estructurada sin cordones para una silueta limpia y minimalista.',
+                specs: ['Composición: 100% Algodón French Terry (520 GSM)', 'Acabado: Lavado enzimático anti-encogimiento', 'Origen textil: Tejeduría certificada de lote limitado', 'Cuidados: Lavar en frío al revés, secar a la sombra'],
+                img: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&w=900&q=80'
+            },
+            {
+                id: 'cargo-vortex',
+                code: 'KRP-PNT-04 // PARACHUTE',
+                category: 'cargos',
+                categoryLabel: 'Pantalones',
+                name: 'Cargo Pants "Vortex" 8-Pocket',
+                shortDesc: 'Pantalón técnico en nylon ripstop anti-desgarro con rodillas articuladas y sistema de ajuste en tobillos.',
+                fullDesc: 'Diseñado para resistencia y ergonomía urbana. Incorpora ocho compartimentos funcionales con solapas ocultas, pinzas anatómicas en rodillas para libertad de movimiento y tensores elásticos internos en el bajo.',
+                specs: ['Composición: 70% Nylon Ripstop / 30% Algodón Técnico', 'Resistencia: Tratamiento hidrofóbico DWR libre de PFC', 'Herrajes: Broches metálicos mate de alta resistencia', 'Corte: Relajado ajustable en cintura y bastilla'],
+                img: 'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?auto=format&fit=crop&w=900&q=80'
+            },
+            {
+                id: 'jacket-spectre',
+                code: 'KRP-JKT-09 // 3-LAYER SHELL',
+                category: 'outerwear',
+                categoryLabel: 'Chaquetas',
+                name: 'Chaqueta "Spectre" Tech-Shell',
+                shortDesc: 'Chaqueta exterior de membrana impermeable de tres capas con cuello alto protector y costuras selladas.',
+                fullDesc: 'Pieza insignia de protección climática de la colección FW26. Su membrana laminada de tres capas bloquea el viento y la lluvia manteniendo la transpirabilidad interna, complementada con cremalleras selladas y ventilación discreta.',
+                specs: ['Membrana: Laminado técnico impermeable 15,000 mm', 'Costuras: Termoselladas en puntos críticos', 'Cierre: Cremallera frontal bidireccional protegida', 'Corte: Estructural para superposición de capas'],
+                img: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=900&q=80'
+            },
+            {
+                id: 'zip-cipher',
+                code: 'KRP-ZIP-02 // MINERAL WASH',
+                category: 'hoodies',
+                categoryLabel: 'Hoodies',
+                name: 'Full-Zip "Cipher" Mineral Wash',
+                shortDesc: 'Sudadera abierta con cierre metálico bidireccional, teñido mineral carbón y detalles desgastados sutiles.',
+                fullDesc: 'Sometida a un proceso individual de pigmentación mineral que produce matices únicos en cada prenda. Incluye cierre metálico cepillado de doble carro y bolsillos frontales integrados en la costura lateral.',
+                specs: ['Composición: 100% Algodón Peinado (480 GSM)', 'Proceso: Teñido mineral artesanal en prenda', 'Cierre: Cremallera metálica bidireccional cepillada', 'Corte: Boxy-fit levemente recortado a la cintura'],
+                img: 'https://images.unsplash.com/photo-1578768079052-aa76e52ff62e?auto=format&fit=crop&w=900&q=80'
+            },
+            {
+                id: 'bomber-obsidian',
+                code: 'KRP-BMB-07 // REVERSIBLE',
+                category: 'outerwear',
+                categoryLabel: 'Chaquetas',
+                name: 'Bomber "Obsidian" MA-1',
+                shortDesc: 'Chaqueta bomber en sarga de nylon balístico negro mate con forro interior acolchado de alto aislamiento.',
+                fullDesc: 'Reinterpretación minimalista de la silueta clásica de aviación. Fabricada en sarga de nylon denso con acabado satinado discreto, relleno térmico ligero y bolsillo utilitario estructural en la manga izquierda.',
+                specs: ['Exterior: 100% Sarga de Nylon Balístico de alta densidad', 'Interior: Forro acolchado térmico mate', 'Cuello y puños: Tejido de punto elástico reforzado', 'Corte: Volumétrico equilibrado'],
+                img: 'https://images.unsplash.com/photo-1544022613-e87ca75a784a?auto=format&fit=crop&w=900&q=80'
+            },
+            {
+                id: 'trouser-monolith',
+                code: 'KRP-PNT-08 // TAILORED TECH',
+                category: 'cargos',
+                categoryLabel: 'Pantalones',
+                name: 'Pantalón "Monolith" Plisado',
+                shortDesc: 'Pantalón de vestir técnico con pinzas frontales, caída recta amplia y tejido resistente a las arrugas.',
+                fullDesc: 'Fusión entre sastrería contemporánea y funcionalidad cotidiana. Elaborado en gabardina técnica de tacto seco con pliegues frontales definidos y cintura semi-elástica oculta para máxima comodidad.',
+                specs: ['Composición: Gabardina técnica de poliéster reciclado y viscosa', 'Caída: Pierna recta amplia (Wide-Straight)', 'Bolsillos: Laterales ocultos y traseros de ojal', 'Mantenimiento: Fácil planchado y alta recuperación'],
+                img: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=900&q=80'
+            }
+        ];
+
+        // 2. SISTEMA DE NAVEGACIÓN ENTRE PÁGINAS INTERNAS (SPA)
+        function navigateTo(pageId, subParam = null) {
+            // Ocultar todas las vistas
+            document.querySelectorAll('.page-view').forEach(page => page.classList.add('hidden'));
+            
+            // Mostrar vista destino
+            const targetPage = document.getElementById(`page-${pageId}`);
+            if (targetPage) {
+                targetPage.classList.remove('hidden');
+            }
+
+            // Actualizar estado activo en barra de navegación
+            document.querySelectorAll('.nav-link').forEach(link => {
+                if (link.dataset.nav === pageId) {
+                    link.classList.add('text-champagne');
+                    link.classList.remove('text-slateMuted');
+                } else {
+                    link.classList.remove('text-champagne');
+                    link.classList.add('text-slateMuted');
+                }
+            });
+
+            // Si va a sección legal con pestaña específica
+            if (pageId === 'legal' && subParam) {
+                switchLegalTab(subParam);
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleMobileMenu() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        }
+        document.getElementById('mobile-menu-btn').addEventListener('click', toggleMobileMenu);
+
+        // 3. RENDERIZADO DE TARJETAS DE PRENDAS (SIN PRECIOS)
+        function createProductCardHTML(item) {
+            return `
+                <article data-category="${item.category}" class="collection-card bg-obsidian border border-graphite hover:border-champagne/60 rounded-3xl overflow-hidden flex flex-col justify-between group transition-all">
+                    <div>
+                        <div class="relative h-80 overflow-hidden bg-graphite cursor-pointer" onclick="openProductDetail('${item.id}')">
+                            <img src="${item.img}" 
+                                 onerror="this.src='https://placehold.co/600x750/1C1C21/C6A87C?text=${encodeURIComponent(item.name)}'"
+                                 alt="${item.name}" 
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            <span class="absolute top-4 left-4 px-3 py-1 rounded-lg bg-void/85 backdrop-blur-md text-champagne font-mono text-[11px] border border-graphite">
+                                ${item.categoryLabel.toUpperCase()}
+                            </span>
+                        </div>
+                        <div class="p-6">
+                            <p class="font-mono text-[11px] text-slateMuted uppercase">${item.code}</p>
+                            <h3 class="font-display font-bold text-xl text-white mt-1 group-hover:text-champagne transition-colors cursor-pointer" onclick="openProductDetail('${item.id}')">
+                                ${item.name}
+                            </h3>
+                            <p class="text-sm text-slateMuted mt-2.5 leading-relaxed">
+                                ${item.shortDesc}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="px-6 pb-6 pt-3 border-t border-graphite/60">
+                        <button onclick="openProductDetail('${item.id}')" class="w-full py-3 rounded-xl bg-void hover:bg-champagne hover:text-void border border-graphite text-platinum font-mono font-medium text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-2">
+                            <span>Consultar Ficha Técnica</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </article>
+            `;
+        }
+
+        function renderCatalogViews() {
+            const homeGrid = document.getElementById('home-featured-carousel');
+            const collectionGrid = document.getElementById('collection-grid');
+
+            homeGrid.innerHTML = catalogItems.slice(0, 3).map(createProductCardHTML).join('');
+            collectionGrid.innerHTML = catalogItems.map(createProductCardHTML).join('');
+        }
+
+        function filterCollection(category, btnEl) {
+            document.querySelectorAll('.col-filter-btn').forEach(btn => {
+                btn.className = 'col-filter-btn px-4 py-2 rounded-lg text-slateMuted hover:text-white transition-all';
+            });
+            btnEl.className = 'col-filter-btn px-4 py-2 rounded-lg bg-champagne text-void font-semibold transition-all';
+
+            document.querySelectorAll('.collection-card').forEach(card => {
+                card.style.display = (category === 'all' || card.dataset.category === category) ? 'flex' : 'none';
+            });
+        }
+
+        // Vista dedicada de detalle por producto
+        function openProductDetail(itemId) {
+            const item = catalogItems.find(p => p.id === itemId);
+            if (!item) return;
+
+            document.getElementById('detail-breadcrumb').textContent = item.name.toUpperCase();
+            const container = document.getElementById('product-detail-container');
+
+            container.innerHTML = `
+                <div class="grid grid-cols-1 lg:grid-cols-12">
+                    <div class="lg:col-span-6 bg-graphite h-[420px] sm:h-[560px] relative">
+                        <img src="${item.img}" 
+                             onerror="this.src='https://placehold.co/800x900/1C1C21/C6A87C?text=${encodeURIComponent(item.name)}'"
+                             alt="${item.name}" 
+                             class="w-full h-full object-cover">
+                    </div>
+                    <div class="lg:col-span-6 p-8 sm:p-12 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="font-mono text-xs text-champagne uppercase tracking-widest">${item.code}</span>
+                                <span class="font-mono text-xs bg-void px-3 py-1 rounded-lg border border-graphite text-slateMuted">ARCHIVO FW26</span>
+                            </div>
+                            <h1 class="font-display font-extrabold text-3xl sm:text-4xl text-white uppercase mb-4">
+                                ${item.name}
+                            </h1>
+                            <p class="text-platinum/90 text-sm sm:text-base leading-relaxed mb-8">
+                                ${item.fullDesc}
+                            </p>
+
+                            <div class="border-t border-graphite pt-6">
+                                <h2 class="font-mono text-xs text-champagne uppercase tracking-widest mb-4">Especificaciones Técnicas y Materiales</h2>
+                                <ul class="space-y-2.5 text-sm text-slateMuted">
+                                    ${item.specs.map(spec => `
+                                        <li class="flex items-start gap-2.5">
+                                            <span class="text-champagne mt-1">▪</span>
+                                            <span>${spec}</span>
+                                        </li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="mt-10 pt-6 border-t border-graphite flex flex-wrap gap-3">
+                            <button onclick="navigateTo('coleccion')" class="px-6 py-3.5 rounded-xl bg-platinum hover:bg-champagne text-void font-mono font-semibold text-xs uppercase tracking-wider transition-colors">
+                                <i class="fa-solid fa-arrow-left mr-2"></i> Volver a Colección
+                            </button>
+                            <button onclick="navigateTo('legal', 'licencias')" class="px-5 py-3.5 rounded-xl bg-void hover:bg-graphite border border-graphite text-slateMuted hover:text-white font-mono text-xs uppercase transition-colors">
+                                Verificar Licencia Visual
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            navigateTo('detalle');
+        }
+
+        // 4. CARRUSELES (HERO Y LOOKBOOK)
+        let currentHero = 0;
+        const heroSlides = document.querySelectorAll('.hero-slide');
+        const heroDots = document.querySelectorAll('.hero-dot');
+
+        function goToHeroSlide(index) {
+            heroSlides.forEach((slide, i) => {
+                slide.classList.toggle('hidden', i !== index);
+                slide.classList.toggle('grid', i === index);
+            });
+            heroDots.forEach((dot, i) => {
+                dot.className = i === index 
+                    ? 'hero-dot w-8 h-1.5 rounded-full bg-champagne transition-all cursor-pointer'
+                    : 'hero-dot w-3 h-1.5 rounded-full bg-zinc-700 transition-all cursor-pointer';
+            });
+            currentHero = index;
+        }
+        function nextHeroSlide() { goToHeroSlide((currentHero + 1) % heroSlides.length); }
+        function prevHeroSlide() { goToHeroSlide((currentHero - 1 + heroSlides.length) % heroSlides.length); }
+        setInterval(nextHeroSlide, 8000);
+
+        function scrollCarousel(elementId, distance) {
+            const container = document.getElementById(elementId);
+            if (container) container.scrollBy({ left: distance, behavior: 'smooth' });
+        }
+
+        // 5. PESTAÑAS DE DOCUMENTACIÓN LEGAL
+        function switchLegalTab(tabName) {
+            document.querySelectorAll('.legal-panel').forEach(panel => panel.classList.add('hidden'));
+            const activePanel = document.getElementById(`legal-content-${tabName}`);
+            if (activePanel) activePanel.classList.remove('hidden');
+
+            document.querySelectorAll('.legal-tab-btn').forEach(btn => {
+                if (btn.dataset.legalTab === tabName) {
+                    btn.className = 'legal-tab-btn px-4 py-2.5 rounded-xl bg-champagne text-void font-semibold';
+                } else {
+                    btn.className = 'legal-tab-btn px-4 py-2.5 rounded-xl bg-obsidian border border-graphite text-slateMuted hover:text-white';
+                }
+            });
+        }
+
+        // 6. SISTEMA DE CONSENTIMIENTO DE COOKIES Y BITÁCORA DE AUDITORÍA (LFPDPPP)
+        const STORAGE_KEY_LOG = 'kryptic_consent_audit_log_v1';
+        const STORAGE_KEY_COOKIE = 'kryptic_cookie_decision_v1';
+
+        function getAuditLogs() {
+            try {
+                return JSON.parse(localStorage.getItem(STORAGE_KEY_LOG)) || [];
+            } catch {
+                return [];
+            }
+        }
+
+        function recordConsentEvent(actionType, methodDescription, documentsAccepted) {
+            const logs = getAuditLogs();
+            const now = new Date();
+            const entry = {
+                id: 'CNS-' + Math.random().toString(36).substring(2, 8).toUpperCase(),
+                timestampISO: now.toISOString(),
+                localDateTime: now.toLocaleString('es-MX', { timeZoneName: 'short' }),
+                actionType: actionType,
+                method: methodDescription,
+                documentsVersion: documentsAccepted,
+                userAgentShort: navigator.platform || 'Web Browser'
+            };
+            logs.unshift(entry);
+            try {
+                localStorage.setItem(STORAGE_KEY_LOG, JSON.stringify(logs));
+            } catch (e) {
+                console.warn('Almacenamiento local restringido:', e);
+            }
+            return entry;
+        }
+
+        function openCookieBanner() {
+            document.getElementById('cookie-banner').classList.remove('hidden');
+        }
+
+        function handleCookieDecision(decisionLabel) {
+            document.getElementById('cookie-banner').classList.add('hidden');
+            try {
+                localStorage.setItem(STORAGE_KEY_COOKIE, decisionLabel);
+            } catch {}
+            const logEntry = recordConsentEvent(
+                'PREFERENCIAS DE COOKIES',
+                `Botón "${decisionLabel}" en Banner de Consentimiento`,
+                'Política de Cookies v2.4 & Aviso de Privacidad LFPDPPP'
+            );
+            showToast(`Consentimiento registrado (${logEntry.id})`);
+        }
+
+        function openAuditModal() {
+            const listContainer = document.getElementById('audit-log-list');
+            const logs = getAuditLogs();
+
+            if (logs.length === 0) {
+                listContainer.innerHTML = `<p class="text-slateMuted py-4 text-center">Aún no se han registrado eventos de consentimiento en esta sesión.</p>`;
+            } else {
+                listContainer.innerHTML = logs.map(log => `
+                    <div class="p-3 rounded-xl bg-obsidian border border-graphite space-y-1">
+                        <div class="flex justify-between text-champagne font-semibold">
+                            <span>[${log.id}] ${log.actionType}</span>
+                            <span>${log.localDateTime}</span>
+                        </div>
+                        <p class="text-platinum">Método: ${log.method}</p>
+                        <p class="text-slateMuted text-[11px]">Documentos: ${log.documentsVersion} | ISO: ${log.timestampISO}</p>
+                    </div>
+                `).join('');
+            }
+            document.getElementById('audit-modal').classList.remove('hidden');
+        }
+
+        function closeAuditModal() {
+            document.getElementById('audit-modal').classList.add('hidden');
+        }
+
+        function exportAuditLog() {
+            const logs = getAuditLogs();
+            const blob = new Blob([JSON.stringify(logs, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `bitacora-consentimiento-kryptic-${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // 7. FORMULARIOS CON DOBLE CASILLA Y REGISTRO DE CONSENTIMIENTO
+        document.getElementById('review-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('rev-name').value.trim();
+            const piece = document.getElementById('rev-piece').value;
+            const comment = document.getElementById('rev-comment').value.trim();
+            const initials = name.slice(0, 2).toUpperCase();
+
+            // Registrar evidencia de aceptación de ambas casillas
+            const logEntry = recordConsentEvent(
+                'FORMULARIO DE RESEÑA',
+                'Doble casilla verificada (Términos + Política de Cookies)',
+                'Términos v2.4, Aviso Privacidad LFPDPPP, Política Cookies v2.4'
+            );
+
+            const newCard = document.createElement('div');
+            newCard.className = 'p-6 rounded-3xl bg-obsidian border border-champagne/50 flex flex-col justify-between';
+            newCard.innerHTML = `
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="text-champagne text-xs space-x-0.5">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        </div>
+                        <span class="font-mono text-[10px] text-champagne bg-void px-2.5 py-0.5 rounded-md border border-graphite">Folio ${logEntry.id}</span>
+                    </div>
+                    <h3 class="font-display font-bold text-white text-base mb-2">"${piece}"</h3>
+                    <p class="text-sm text-slateMuted leading-relaxed mb-6">${comment}</p>
+                </div>
+                <div class="flex items-center gap-3 pt-4 border-t border-graphite">
+                    <div class="w-9 h-9 rounded-full bg-graphite border border-champagne/50 text-champagne font-mono font-bold text-xs flex items-center justify-center">${initials}</div>
+                    <div>
+                        <p class="text-xs font-bold text-white">${name}</p>
+                        <p class="font-mono text-[11px] text-slateMuted">Comunidad Verificada</p>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('reviews-grid').prepend(newCard);
+            this.reset();
+            showToast(`Reseña publicada y consentimiento registrado (${logEntry.id})`);
+        });
+
+        document.getElementById('newsletter-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const logEntry = recordConsentEvent(
+                'SUSCRIPCIÓN BOLETÍN',
+                'Doble casilla verificada en Footer (Términos + Política de Cookies)',
+                'Términos v2.4, Aviso Privacidad LFPDPPP, Política Cookies v2.4'
+            );
+            this.reset();
+            showToast(`Suscripción confirmada. Folio de consentimiento: ${logEntry.id}`);
+        });
+
+        // 8. NOTIFICACIÓN TOAST
+        let toastTimeout;
+        function showToast(msg) {
+            const toast = document.getElementById('toast-notification');
+            document.getElementById('toast-message').textContent = msg;
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 3800);
+        }
+
+        // INICIALIZACIÓN AL CARGAR
+        window.addEventListener('DOMContentLoaded', () => {
+            renderCatalogViews();
+            // Mostrar banner de cookies si aún no existe una decisión previa
+            try {
+                if (!localStorage.getItem(STORAGE_KEY_COOKIE)) {
+                    openCookieBanner();
+                }
+            } catch {
+                openCookieBanner();
+            }
+        });
+    </script>
+</body>
+</html>
